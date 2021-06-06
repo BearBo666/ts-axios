@@ -10,6 +10,7 @@ function createInstance(): AxiosInstance {
   const context = new Axios()
   const instance = Axios.prototype.request.bind(context)
 
+  //拷贝原型上的方法
   extend(instance, context)
 
   return instance as AxiosInstance

@@ -15,9 +15,10 @@ export default function dispatchRequest(config: AxiosRequestConfig): AxiosPromis
 
 //处理config
 function processConfig(config: AxiosRequestConfig): void {
+  //转换url,data,headers
   config.url = transformURL(config)
-  config.data = transformRequestData(config)
   config.headers = transfromHeaders(config)
+  config.data = transformRequestData(config)
 }
 
 //转换url

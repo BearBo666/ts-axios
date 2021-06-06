@@ -4,9 +4,8 @@ import { createError } from '../helpers/error'
 
 export default function xhr(config: AxiosRequestConfig): AxiosPromise {
   return new Promise((resolve, reject) => {
-    //解构配置
+    //解构配置,默认为get方法
     const { data = null, url, method = 'get', headers, responseType, timeout } = config
-
     //生成ajax对象
     const request = new XMLHttpRequest()
 
@@ -20,7 +19,7 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
       request.timeout = timeout
     }
 
-    //配置请求
+    //配置请求 !表断言
     request.open(method.toUpperCase(), url!, true)
 
     //监听状态变化
