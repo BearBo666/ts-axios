@@ -27,7 +27,9 @@ module.exports = {
    * 根据不同的目录名称，打包生成目标 js，名称和目录名一致
    */
   output: {
+    //输出路径: /example/__build__
     path: path.join(__dirname, '__build__'),
+    //以原文件夹命名
     filename: '[name].js',
     publicPath: '/__build__/'
   },

@@ -8,21 +8,29 @@ import {
 } from '../types'
 import dispatchRequest from './dispatchRequest'
 import InterceptorManager from './interceptorManager'
+import mergeConfig from './mergeConfig'
 
+//拦截器接口
 interface Interceptors {
   request: InterceptorManager<AxiosRequestConfig>
   response: InterceptorManager<AxiosResponse>
 }
 
+//promise链接口
 interface PromiseChain<T> {
   resolved: ResolvedFn<T> | ((config: AxiosRequestConfig) => AxiosPromise)
   rejected?: RejectedFn
 }
 
 export default class Axios {
+  //拦截器
   interceptors: Interceptors
+  //默认配置
+  defaults: AxiosRequestConfig
 
-  constructor() {
+  //初始化配置
+  constructor(initConfig: AxiosRequestConfig) {
+    this.defaults = initConfig
     this.interceptors = {
       request: new InterceptorManager<AxiosRequestConfig>(),
       response: new InterceptorManager<AxiosResponse>()
@@ -38,6 +46,9 @@ export default class Axios {
     } else {
       config = url
     }
+
+    //合并默认配置和自定义配置
+    config = mergeConfig(this.defaults, config)
 
     //promise链
     const chain: PromiseChain<any>[] = [

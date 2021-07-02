@@ -1,11 +1,14 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+
+//引入webpack中间件及配置
 const webpack = require('webpack')
 const webpackDevMiddleware = require('webpack-dev-middleware')
 const webpackHotMiddleware = require('webpack-hot-middleware')
 const WebpackConfig = require('./webpack.config')
 
 const app = express()
+//编译器
 const compiler = webpack(WebpackConfig)
 
 app.use(webpackDevMiddleware(compiler, {
@@ -35,6 +38,8 @@ registerErrorRouter()
 registerExtendRouter()
 
 registerInterceptorRouter()
+
+ConfigRouter()
 
 app.use(router)
 
@@ -142,5 +147,11 @@ function registerExtendRouter() {
 function registerInterceptorRouter() {
   router.get('/interceptor/get', function (req, res) {
     res.end('hello')
+  })
+}
+
+function ConfigRouter() {
+  router.post('/config/post', (req, res) => {
+    res.json(req.body)
   })
 }
