@@ -7,6 +7,8 @@ import { extend } from './helpers/util'
 //默认配置
 import defaluts from './defaults'
 import mergeConfig from './core/mergeConfig'
+import CancelToken from './cancel/CancelToken'
+import Cancel, { isCancel } from './cancel/Cancel'
 
 //创建实例(工厂函数)
 function createInstance(config: AxiosRequestConfig): AxiosStatic {
@@ -25,5 +27,10 @@ const axios = createInstance(defaluts)
 axios.create = function(config) {
   return createInstance(mergeConfig(defaluts, config))
 }
+
+//扩展取消方法
+axios.CancelToken = CancelToken
+axios.Cancel = Cancel
+axios.isCancel = isCancel
 
 export default axios
