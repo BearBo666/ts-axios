@@ -1,14 +1,18 @@
 import { AxiosRequestConfig, AxiosPromise, AxiosResponse } from '../types'
 import xhr from './xhr'
-import { buildURL } from '../helpers/url'
+import { buildURL, combineURL, isAbsoluteURL } from '../helpers/url'
 import { flattenHeaders } from '../helpers/headers'
 import transform from './transform'
 
 //发送请求
 export default function dispatchRequest(config: AxiosRequestConfig): AxiosPromise {
+  //如果取消了请求则抛出错误
   throwIfCancellationRequested(config)
+  //处理config
   processConfig(config)
+  //返回xhr函数的promise
   return xhr(config).then(res => {
+    //处理响应对象
     return transformResponseData(res)
   })
 }
@@ -18,25 +22,33 @@ function processConfig(config: AxiosRequestConfig): void {
   //转换url,data,headers
   config.url = transformURL(config)
   config.data = transform(config.data, config.headers, config.transformRequest)
+  //扁平化请求头
   config.headers = flattenHeaders(config.headers, config.method!)
 }
 
 //转换url
-function transformURL(config: AxiosRequestConfig): string {
-  const { url, params } = config
-  return buildURL(url!, params)
+export function transformURL(config: AxiosRequestConfig): string {
+  let { url, params, paramsSerializer, baseURL } = config
+  if (baseURL && !isAbsoluteURL(url!)) {
+    url = combineURL(baseURL, url)
+  }
+  return buildURL(url!, params, paramsSerializer)
 }
 
-//格式化headers
+//格式化headers，变成对象形式
 export function parseHeaders(headers: string): any {
+  //空对象
   let parsed = Object.create(null)
 
+  //若没有请求头
   if (!headers) {
     return parsed
   }
+  //请求头之间以\r\n隔开
   headers.split('\r\n').forEach(line => {
+    //拿到k-v对
     let [key, val] = line.split(':')
-
+    //key变小写
     key = key.trim().toLowerCase()
     if (!key) {
       return
@@ -55,6 +67,7 @@ function transformResponseData(res: AxiosResponse): AxiosResponse {
   return res
 }
 
+//如果取消了请求则抛出错误
 function throwIfCancellationRequested(config: AxiosRequestConfig): void {
   if (config.cancelToken) {
     config.cancelToken.throwIfRequested()

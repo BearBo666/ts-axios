@@ -1,11 +1,16 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-
+const cookie = require('cookie-parser')
+const multipart = require('connect-multiparty')
+const path = require('path')
+const atob = require('atob')
 //引入webpack中间件及配置
 const webpack = require('webpack')
 const webpackDevMiddleware = require('webpack-dev-middleware')
 const webpackHotMiddleware = require('webpack-hot-middleware')
 const WebpackConfig = require('./webpack.config')
+
+require('./server2')
 
 const app = express()
 //编译器
@@ -21,11 +26,19 @@ app.use(webpackDevMiddleware(compiler, {
 
 app.use(webpackHotMiddleware(compiler))
 
-app.use(express.static(__dirname))
+app.use(express.static(__dirname, {
+  setHeaders(res) {
+    res.cookie('XSRF-TOKEN-D', 'Bear')
+  }
+}))
 
 app.use(bodyParser.json())
 // app.use(bodyParser.text())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(cookie())
+app.use(multipart({
+  uploadDir: path.resolve(__dirname, 'upload')
+}))
 
 const router = express.Router()
 
@@ -42,6 +55,8 @@ registerInterceptorRouter()
 ConfigRouter()
 
 registerCancelRouter()
+
+registerMoreRouter()
 
 app.use(router)
 
@@ -169,5 +184,44 @@ function registerCancelRouter() {
     setTimeout(() => {
       res.json(req.body)
     }, 1000)
+  })
+}
+
+function registerMoreRouter() {
+  router.get('/more/get', (req, res) => {
+    res.json(req.query)
+  })
+
+  router.post('/more/post', (req, res) => {
+    // res.json(req.headers)
+    const auth = req.headers['authorizetion']
+    console.log('auth:' + auth)
+    const [type, val] = auth.split(' ')
+    console.log(atob(val))
+    const [username, password] = atob(val).split(':')
+    if (type === 'Basic' && username === 'admin' && password === '123456') {
+      res.json(req.body)
+    } else {
+      res.status(401)
+      res.end('未授权')
+    }
+  })
+
+  router.post('/more/upload', (req, res) => {
+    console.log(req.body, req.files)
+    res.end('上传成功')
+  })
+
+  router.get('/more/304', (req, res) => {
+    res.status(304)
+    res.end('response 304')
+  })
+
+  router.get('/more/A', (req, res) => {
+    res.end('A')
+  })
+
+  router.get('/more/B', (req, res) => {
+    res.end('B')
   })
 }

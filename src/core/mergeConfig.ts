@@ -6,7 +6,7 @@ const strats = Object.create(null)
 //需要执行value2上合并策略的字段
 const stratKeysFromVal2 = ['url', 'params', 'data']
 //需要深度拷贝策略的字段
-const stratsKeysDeepMerge = ['headers']
+const stratsKeysDeepMerge = ['headers', 'auth']
 
 //1.默认策略
 function defaultStart(val1: any, val2: any): any {

@@ -5,13 +5,16 @@ interface Interceptor<T> {
   rejected?: RejectedFn
 }
 
+//默认导出拦截管理器
 export default class InterceptorManager<T> {
+  //拦截器数组
   private interceptors: Array<Interceptor<T> | null>
 
   constructor() {
     this.interceptors = []
   }
 
+  //应用一个拦截器
   use(resolved: ResolvedFn<T>, rejected?: RejectedFn): number {
     this.interceptors.push({
       resolved,

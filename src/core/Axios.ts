@@ -6,7 +6,7 @@ import {
   RejectedFn,
   ResolvedFn
 } from '../types'
-import dispatchRequest from './dispatchRequest'
+import dispatchRequest, { transformURL } from './dispatchRequest'
 import InterceptorManager from './interceptorManager'
 import mergeConfig from './mergeConfig'
 
@@ -22,6 +22,7 @@ interface PromiseChain<T> {
   rejected?: RejectedFn
 }
 
+//导出axios类
 export default class Axios {
   //拦截器
   interceptors: Interceptors
@@ -37,6 +38,7 @@ export default class Axios {
     }
   }
 
+  //请求方法
   request(url: any, config?: any): AxiosPromise {
     if (typeof url === 'string') {
       if (!config) {
@@ -58,16 +60,19 @@ export default class Axios {
       }
     ]
 
+    //遍历请求拦截器
     this.interceptors.request.forEach(interceptor => {
       chain.unshift(interceptor)
     })
 
+    //遍历响应拦截器
     this.interceptors.response.forEach(interceptor => {
       chain.push(interceptor)
     })
 
     let promise = Promise.resolve(config)
 
+    //当有拦截器时
     while (chain.length) {
       const { resolved, rejected } = chain.shift()!
 
@@ -105,6 +110,7 @@ export default class Axios {
     return this.__requestMethodWithData('patch', url, data, config)
   }
 
+  //没有请求体数据的方法
   __requestMethodWithoutData(
     method: Method,
     url: string,
@@ -118,6 +124,7 @@ export default class Axios {
     )
   }
 
+  //有请求体数据的方法
   __requestMethodWithData(
     method: Method,
     url: string,
@@ -131,5 +138,10 @@ export default class Axios {
         data
       })
     )
+  }
+
+  getUri(config?: AxiosRequestConfig): string {
+    config = mergeConfig(this.defaults, config)
+    return transformURL(config)
   }
 }
